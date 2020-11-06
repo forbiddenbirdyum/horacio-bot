@@ -1,13 +1,13 @@
 const fs = require('fs');
 const Discord = require('discord.js');
-const { prefix, quotePrefix } = require('./config.json');
-const startRegex = new RegExp(`(^${quotePrefix}.+\n${prefix})|(^${prefix})`);
+const UserError = require('./UserError.js');
+const { parseInputCommand } = require('./helpers');
 
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
 
 (() => {
-  const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+  const commandFiles = fs.readdirSync('./commands').filter((file) => file.endsWith('.js'));
 
   for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
@@ -15,38 +15,29 @@ client.commands = new Discord.Collection();
   }
 })();
 
-client.on('message', message => {
-  if (!startRegex.test(message.content) || message.author.bot) return;
+client.on('message', (message) => {
+  if (message.author.bot) return;
 
-  const input = parseInputCommand();
+  const input = parseInputCommand(message);
 
-	if (!client.commands.has(input.command)) return;
+  if (!client.commands.has(input.command)) return;
 
   const command = client.commands.get(input.command);
 
-  if(command.args && !input.args.length) {
-    return message.channel.send('You didn\'t provide any arguments');
-  }
-
   try {
+    if (command.hasArgs() && !input.args.length) {
+      throw new UserError('you didn\'t provide any arguments');
+    }
+
     command.execute(message, input, client);
   } catch (err) {
-    console.error(err);
-
-    if(err instanceof Error) {
+    if (err instanceof UserError) {
       message.reply(err.message);
       return;
     }
+    console.error(err);
     message.reply('Error while trying to execute that command');
   }
-
-  function parseInputCommand() {
-    const quote = message.content.match(/^>.+/)?.[0].slice(quotePrefix.length);
-    const args = message.content.match(/^!.+/m)?.[0].slice(1).trim().split(/ +/);
-    const command = args.shift().toLowerCase();
-  
-    return { quote, args, command };
-  }
-})
+});
 
 client.login(process.env.AUTH_TOKEN);
