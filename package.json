@@ -1,0 +1,22 @@
+{
+  "name": "horacio-bot",
+  "version": "0.1.0",
+  "description": "The bot for The Programmers' Pool discord server",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon -r dotenv/config index.js"
+  },
+  "keywords": [
+    "bot",
+    "discord"
+  ],
+  "author": "theforbiddenpool <contact@theforbiddenpool.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  },
+  "dependencies": {
+    "discord.js": "^12.4.1",
+    "dotenv": "^8.2.0"
+  }
+}
