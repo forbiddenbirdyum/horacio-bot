@@ -13,5 +13,5 @@ jobs:
       - uses: akhileshns/heroku-deploy@v3.6.8 
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: "horatio-bot"
+          heroku_app_name: "horacio-bot"
           heroku_email: "peterwilms@protonmail.com"
