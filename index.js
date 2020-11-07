@@ -15,7 +15,7 @@ client.commands = new Discord.Collection();
   }
 })();
 
-client.on('message', (message) => {
+client.on('message', async (message) => {
   if (message.author.bot) return;
 
   const input = parseInputCommand(message);
@@ -29,7 +29,7 @@ client.on('message', (message) => {
       throw new UserError('you didn\'t provide any arguments');
     }
 
-    command.execute(message, input, client);
+    await command.execute(message, input, client);
   } catch (err) {
     if (err instanceof UserError) {
       message.reply(err.message);
