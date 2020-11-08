@@ -1,6 +1,9 @@
 const fs = require('fs');
 const Discord = require('discord.js');
 const UserError = require('./UserError.js');
+const { prefix, quotePrefix } = require('./config');
+
+const startRegex = new RegExp(`(^${quotePrefix}.+\n${prefix})|(^${prefix})`);
 const { parseInputCommand } = require('./helpers');
 
 const client = new Discord.Client();
@@ -16,17 +19,24 @@ client.commands = new Discord.Collection();
 })();
 
 client.on('message', async (message) => {
-  if (message.author.bot) return;
+  if (!startRegex.test(message.content) || message.author.bot) return;
 
   const input = parseInputCommand(message);
 
-  if (!client.commands.has(input.command)) return;
-
-  const command = client.commands.get(input.command);
-
   try {
+    if (!client.commands.has(input.command)) {
+      throw new UserError('unknown command');
+    }
+
+    const command = client.commands.get(input.command);
+
     if (command.hasArgs() && !input.args.length) {
-      throw new UserError('you didn\'t provide any arguments');
+      let reply = 'you didn\'t provide any arguments';
+      if (command.usage) {
+        reply += command.usage;
+      }
+
+      throw new UserError(reply);
     }
 
     await command.execute(message, input, client);
@@ -36,7 +46,7 @@ client.on('message', async (message) => {
       return;
     }
     console.error(err);
-    message.reply('Error while trying to execute that command');
+    message.reply('error while trying to execute that command');
   }
 });
 
