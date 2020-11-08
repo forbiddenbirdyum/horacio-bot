@@ -63,7 +63,7 @@ function voteCollectorFactory(command, message, votesNeeded, filter, opts = { ti
   // Making sure setup time is taken into account
   voteCollector.resetTimer();
 
-  message.channel.send(`Voting has started, type !votepin to vote (votes needed: ${actualVotesNeeded})`);
+  message.channel.send(`Voting has started, type !${command} to vote (votes needed: ${actualVotesNeeded})`);
   return voteCollector;
 }
 
