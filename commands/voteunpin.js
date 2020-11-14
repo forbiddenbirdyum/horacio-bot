@@ -7,7 +7,7 @@ let voteCollector;
 
 module.exports = {
   name: 'voteunpin',
-  description: 'Vote for pinning a message',
+  description: 'Vote for unpinning a message',
   hasArgs: () => {
     if (!voteCollector) return true;
     if (!voteCollector.ended) return false;

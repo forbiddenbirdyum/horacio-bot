@@ -10,7 +10,8 @@ const isValidLang = (langArg) => langArg.split('-').every((lang) => ISO6391.vali
 
 module.exports = {
   name: 'translate',
-  description: 'Vote for pinning a message',
+  description: 'Translate text or quotes.',
+  aliases: ['tr'],
   hasArgs: () => true,
   get usage() {
     return `\`\`\`

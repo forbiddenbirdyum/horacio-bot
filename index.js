@@ -24,12 +24,12 @@ client.on('message', async (message) => {
   const input = parseInputCommand(message);
 
   try {
-    if (!client.commands.has(input.command)) {
+    const command = client.commands.get(input.command)
+    || client.commands.find((cmd) => cmd.aliases && cmd.aliases.includes(input.command));
+
+    if (!command) {
       throw new UserError('unknown command');
     }
-
-    const command = client.commands.get(input.command);
-
     if (command.hasArgs() && !input.args.length) {
       let reply = 'you didn\'t provide any arguments';
       if (command.usage) {

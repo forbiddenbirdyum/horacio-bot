@@ -1,0 +1,65 @@
+const moment = require('moment');
+
+function getMaxUnit(diff) {
+  let duration = moment.duration(diff).asMilliseconds();
+  if (duration < 1100) {
+    return {
+      unit: 'miliseconds',
+      duration,
+    };
+  }
+  duration = moment.duration(diff).asSeconds();
+  if (duration < 61) {
+    return {
+      unit: 'seconds',
+      duration,
+    };
+  }
+  duration = moment.duration(diff).asMinutes();
+  if (duration < 61) {
+    return {
+      unit: 'minutes',
+      duration,
+    };
+  }
+  duration = moment.duration(diff).asHours();
+  if (duration < 25) {
+    return {
+      unit: 'hours',
+      duration,
+    };
+  }
+  duration = moment.duration(diff).asDays();
+  if (duration < 366) {
+    return {
+      unit: 'days',
+      duration,
+    };
+  }
+  duration = moment.duration(diff).asYears();
+
+  return {
+    unit: 'years',
+    duration,
+  };
+}
+
+module.exports = {
+  name: 'lastseen',
+  description: 'Returns the Time the Person was last seen',
+  aliases: ['ls'],
+  hasArgs: () => true,
+  async execute(message, args, client) {
+    const user = message.mentions.users.values().next().value;
+    // if (!user.lastMessageID) message.channel.send('User does not have any last message in this channel');
+    const msg = await message.channel.messages.fetch(user.lastMessageID);
+    const today = moment().utc();
+    const ts = moment(msg.createdTimestamp).utc();
+
+    const diff = today.diff(ts, 'ms');
+    console.log(diff, ts, today);
+    const { unit, duration } = getMaxUnit(diff);
+    console.log(unit, duration);
+    message.channel.send(`It has been ${duration.toFixed('2')} ${unit}, since ${user} was last active in chat.`);
+  },
+};

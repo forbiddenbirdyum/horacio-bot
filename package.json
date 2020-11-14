@@ -24,6 +24,7 @@
     "discord.js": "^12.4.1",
     "dotenv": "^8.2.0",
     "iso-639-1": "^2.1.4",
+    "moment": "^2.29.1",
     "node-fetch": "^2.6.1"
   },
   "engines": {
