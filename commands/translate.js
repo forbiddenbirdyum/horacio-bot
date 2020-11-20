@@ -11,7 +11,7 @@ const isValidLang = (langArg) => langArg.split('-').every((lang) => ISO6391.vali
 
 module.exports = {
   name: 'translate',
-  description: 'Translate text or quotes.',
+  description: 'Translate text or quotes',
   aliases: ['tr'],
   needsArgs: () => true,
   get usage() {
