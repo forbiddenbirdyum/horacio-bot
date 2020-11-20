@@ -1,6 +1,6 @@
 const { minVotes } = require('../config');
 const UserError = require('../UserError');
-const { voteCollectorFactory } = require('../helpers');
+const { voteCollectorFactory, getMessageById } = require('../helpers');
 
 let pinMessage = null;
 let voteCollector;
@@ -11,17 +11,14 @@ module.exports = {
   get usage() {
     return `\`\`\`!${this.name} <message-link>\`\`\``;
   },
-  hasArgs: () => {
+  needsArgs: () => {
     if (!voteCollector) return true;
     if (!voteCollector.ended) return false;
     return true;
   },
-  async execute(message, { args }) {
+  async execute(message, { quoteID }) {
     if (!voteCollector || voteCollector.ended) {
-      const [messageLink] = args;
-      const messageID = messageLink.split('/').pop();
-      const chatMessage = await message.channel.messages.fetch(messageID)
-        .catch(() => { throw new UserError('404 Message not found 🤷'); });
+      const chatMessage = await getMessageById(message, quoteID);
       if (chatMessage.pinned) throw new UserError('message provided is already pinned');
 
       pinMessage = chatMessage;

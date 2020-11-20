@@ -1,11 +1,26 @@
-const { quotePrefix } = require('./config');
+const fs = require('fs');
+const UserError = require('./UserError');
 
 function parseInputCommand(message) {
-  const quote = message.content.match(/^>.+/)?.[0].slice(quotePrefix.length);
+  const quoteID = message.reference?.messageID;
   const args = message.content.match(/^!.+/m)?.[0].slice(1).trim().split(/ +/);
   const command = args && args.shift().toLowerCase();
 
-  return { quote, args, command };
+  return { quoteID, args, command };
+}
+
+function getMessageById(message, messageID) {
+  return message.channel.messages.fetch(messageID)
+    .catch(() => { throw new UserError('404 Message not found 🤷'); });
+}
+
+function getCommands(fn) {
+  const commandFiles = fs.readdirSync('./commands').filter((file) => file.endsWith('.js'));
+
+  for (const file of commandFiles) {
+    const command = require(`./commands/${file}`);
+    fn(command);
+  }
 }
 
 /**
@@ -69,5 +84,7 @@ function voteCollectorFactory(command, message, votesNeeded, filter, opts = { ti
 
 module.exports = {
   parseInputCommand,
+  getMessageById,
+  getCommands,
   voteCollectorFactory,
 };

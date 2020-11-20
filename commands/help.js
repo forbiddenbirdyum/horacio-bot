@@ -1,14 +1,18 @@
+const { getCommands } = require('../helpers');
+
 module.exports = {
   name: 'help',
   description: 'List all available commands',
   aliases: ['h'],
-  hasArgs: () => false,
+  needsArgs: () => false,
   async execute(message) {
-    message.channel.send(`\`\`\`\n!help - List all available commands\n
-!votepin - Start vote to pin a message\n
-!voteunpin - Start vote to unpin a message\n
-!translate - Translate a quote or text to a specified language\n
-!doubt - Doubt everything or user mentioned\n\`\`\`
-`);
+    const commandsArray = [];
+    getCommands((command) => {
+      commandsArray.push(command);
+    });
+
+    const textCommand = commandsArray.map((c) => `!${c.name} – ${c.description}`);
+
+    message.channel.send(`\`\`\`${textCommand.join('\n')}\`\`\``);
   },
 };
