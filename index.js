@@ -16,7 +16,6 @@ client.commands = new Discord.Collection();
 
 client.on('message', async (message) => {
   if (!startRegex.test(message.content) || message.author.bot) return;
-  console.log('GOT REQUEST');
   const input = parseInputCommand(message);
 
   try {

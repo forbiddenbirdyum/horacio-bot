@@ -8,46 +8,27 @@ module.exports = {
   needsArgs: () => true,
   get usage() {
     return `\`\`\`
-!ipa word
+!ipa word language
 \`\`\`
     `;
   },
   async execute(message, { args }) {
-    console.log(args);
-    const lang = args.pop();
-    const word = args.join('_');
-    const response = await fetch(`https://en.wiktionary.org/wiki/${encodeURI(word.toLowerCase())}`);
-    if (response.status === 404) throw new UserError('Could not find matching Page');
+    const [word, lang] = args;
+    if (!lang) throw new UserError('language argument is missing');
+    const response = await fetch(`https://www.howtopronounce.com/${lang.toLowerCase()}/${word.toLowerCase()}`);
+    if (response.status === 404) throw new UserError('could not find anything related to your search');
     if (!response.ok) throw new Error(response.statusText);
     const html = await response.text();
     const $ = cheerio.load(html);
-    if (!$(`#${lang}`).html()) throw new UserError('No entry for this language found');
-    const langNode = $(`#${lang}`);
-    let result = langNode
-      .parent()
-      .nextUntil('ul')
-      .last()
+    const result = $('div.toggleIpaHypenate.d-flex > span.languageTitle.whiteSpaceNoWrap:contains("IPA")')
       .next()
       .children()
-      .find('.IPA')
-      .text();
-    if (!result) {
-      result = $(`h2 > span#${lang}`)
-        .parent()
-        .next()
-        .next()
-        .next()
-        .next()
-        .next()
-        .children()
-        .find('.IPA')
-        .first()
-        .text();
-
-      if (!result) throw new UserError('No entry for this language found');
-    }
+      .map(function fn() {
+        return $(this).text();
+      })
+      .get()
+      .join(' ');
+    if (!result) throw new UserError('could not find IPA for specified word');
     message.channel.send(result);
-    // slowly going insane
-    // console.log(ipa);
   },
 };
