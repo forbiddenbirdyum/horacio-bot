@@ -26,7 +26,7 @@ OR
     `;
   },
   async execute(message, { args, quoteID }) {
-    const lang = args.pop();
+    const lang = (args.length > 1) ? args.pop() : 'de-en';
     if (!lang.match(/^[a-zA-z]{2}-[a-zA-z]{2}$/)) throw new UserError('language argument is not valid. Please check here → https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes');
     if (!isValidLang(lang)) throw new UserError('one of the languages provided is not valid');
     let text;
