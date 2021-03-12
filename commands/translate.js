@@ -4,6 +4,7 @@ const ISO6391 = require('iso-639-1');
 const UserError = require('../UserError');
 const { translateLimit } = require('../config');
 const { getMessageById } = require('../helpers');
+const { User } = require('discord.js');
 
 const { WATSON_KEY } = process.env;
 
@@ -26,9 +27,14 @@ OR
     `;
   },
   async execute(message, { args, quoteID }) {
-    const lang = (args.length > 1) ? args.pop() : 'de-en';
-    if (!lang.match(/^[a-zA-z]{2}-[a-zA-z]{2}$/)) throw new UserError('language argument is not valid. Please check here → https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes');
-    if (!isValidLang(lang)) throw new UserError('one of the languages provided is not valid');
+    let lastArg = args.pop();
+    let lang;
+    if(lastArg.match(/^[a-zA-z]{2}-[a-zA-z]{2}$/)) {
+      if (!isValidLang(lastArg)) throw new UserError('language argument is not valid. Please check here → https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes');
+      lang = lastArg;
+    } else {
+      args.push(lastArg);
+    }
     let text;
     if (quoteID) {
       if (args.length) throw new UserError(`too many arguments provided${this.usage}`);
@@ -39,7 +45,6 @@ OR
     }
 
     if (text.length > translateLimit) throw new UserError(`sentence too long. Max length is ${translateLimit} characters`);
-
     const auth = btoa(`apikey:${WATSON_KEY}`);
     const response = await fetch('https://api.eu-de.language-translator.watson.cloud.ibm.com/instances/a769df51-3081-4acb-94f4-c80c182418a1/v3/translate?version=2018-05-01', {
       method: 'POST',
@@ -49,12 +54,16 @@ OR
       },
       body: JSON.stringify({
         text,
-        model_id: lang,
+        model_id: lang || "de-en",
       }),
     });
 
-    if (!response.ok) throw new Error(response.statusText);
-
+    if (!response.ok) {
+      if(response.statusText === "Not Found") {
+        throw new UserError('no translation found');
+      }
+      throw new Error(response.statusText);
+    }
     const { translations } = await response.json();
     const [{ translation }] = translations;
     if (translation) {
