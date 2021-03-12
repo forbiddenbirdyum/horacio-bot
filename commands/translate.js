@@ -4,7 +4,6 @@ const ISO6391 = require('iso-639-1');
 const UserError = require('../UserError');
 const { translateLimit } = require('../config');
 const { getMessageById } = require('../helpers');
-const { User } = require('discord.js');
 
 const { WATSON_KEY } = process.env;
 
